@@ -7,7 +7,7 @@
 	<groupId>com.nihalsoft.java</groupId>
 	<artifactId>jbean</artifactId>
 	<version>1.0</version>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -16,6 +16,12 @@
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-install-plugin</artifactId>
+				<configuration>
+					<createChecksum>true</createChecksum>
 				</configuration>
 			</plugin>
 			<plugin>
