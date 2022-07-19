@@ -43,14 +43,14 @@ public class JBean {
             jb = new JBeanBuilder(clazz);
         }
 
-        String pkg = jb.getPackageToScan();
+        String pkg[] = jb.getPackageToScan();
         _verbose = jb.isVerbose();
 
         try {
 
             _log("Start scanning packages :" + pkg);
 
-            if (pkg == null || pkg.length() == 0) {
+            if (pkg == null || pkg.length == 0) {
                 System.out.println("No packages to scan");
                 return;
             }
@@ -123,25 +123,27 @@ public class JBean {
         _log("");
         int i = 0;
 
-        List<Class<?>> annotated = reflections.getClassesAnnotatedWith(jb.getPackageToScan(), BeanConfiguration.class);
+        for (String pkg : jb.getPackageToScan()) {
+            List<Class<?>> annotated = reflections.getClassesAnnotatedWith(pkg, BeanConfiguration.class);
 
-        for (Class<?> clazz : annotated) {
+            for (Class<?> clazz : annotated) {
 
-            Object resourceList = clazz.newInstance();
-            JBean._injectField(resourceList, resourceList.getClass());
+                Object resourceList = clazz.newInstance();
+                JBean._injectField(resourceList, resourceList.getClass());
 
-            List<Method> methods = reflections.getDeclaredMethodsAnnotatedWith(clazz, Bean.class);
+                List<Method> methods = reflections.getDeclaredMethodsAnnotatedWith(clazz, Bean.class);
 
-            i = 0;
-            for (Method method : methods) {
-                Bean bean = method.getAnnotation(Bean.class);
-                if (bean != null && bean.scope() == BeanScope.SINGLETON) {
-                    _register(bean, method.invoke(resourceList));
-                    i++;
+                i = 0;
+                for (Method method : methods) {
+                    Bean bean = method.getAnnotation(Bean.class);
+                    if (bean != null && bean.scope() == BeanScope.SINGLETON) {
+                        _register(bean, method.invoke(resourceList));
+                        i++;
+                    }
                 }
-            }
 
-            _log("Resource list count for " + clazz.getName() + " is " + i);
+                _log("Resource list count for " + clazz.getName() + " is " + i);
+            }
         }
 
     }
@@ -149,9 +151,11 @@ public class JBean {
     private static void _scanResource() throws Exception {
         _log("");
         _log("Scanning Resource");
-        List<Class<?>> annotated = reflections.getClassesAnnotatedWith(jb.getPackageToScan(), Bean.class);
-        annotated.forEach(JBean::_register);
-        _log("Resource count " + annotated.size());
+        for (String pkg : jb.getPackageToScan()) {
+            List<Class<?>> annotated = reflections.getClassesAnnotatedWith(pkg, Bean.class);
+            annotated.forEach(JBean::_register);
+            _log("Resource count " + annotated.size());
+        }
     }
 
     private static void _inject() {

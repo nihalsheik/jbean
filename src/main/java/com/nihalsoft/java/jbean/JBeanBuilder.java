@@ -2,7 +2,7 @@ package com.nihalsoft.java.jbean;
 
 public class JBeanBuilder {
 
-    private String packageToScan = "";
+    private String[] packageToScan;
     private String propertySource = "";
     private boolean includeSuperClassForInject = false;
     private boolean verbose = true;
@@ -11,14 +11,14 @@ public class JBeanBuilder {
     }
 
     public JBeanBuilder(Class<?> clazz) {
-        this.packageToScan = clazz.getPackage().getName();
+        this.packageToScan = new String[] { clazz.getPackage().getName() };
     }
 
-    public String getPackageToScan() {
+    public String[] getPackageToScan() {
         return packageToScan;
     }
 
-    public JBeanBuilder packageToScan(String packageToScan) {
+    public JBeanBuilder packageToScan(String... packageToScan) {
         this.packageToScan = packageToScan;
         return this;
     }
@@ -51,8 +51,8 @@ public class JBeanBuilder {
     }
 
     public void run(Class<?> clazz) throws Exception {
-        if (packageToScan.isEmpty()) {
-            packageToScan = clazz.getPackage().getName();
+        if (packageToScan == null) {
+            packageToScan = new String[] { clazz.getPackage().getName() };
         }
         JBean.run(clazz);
     }
