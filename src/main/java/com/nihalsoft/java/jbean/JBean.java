@@ -99,7 +99,7 @@ public class JBean {
                 return (T) bi.object();
 
             } else if (bi.isPrototype()) {
-                Class<T> c = (Class<T>) bi.object();
+                Class<T> c = (Class<T>) Class.forName(bi.object().toString());
                 _log("Prototype Bean " + c.getName());
                 Object ins = c.newInstance();
                 JBean.inject(ins);
@@ -125,7 +125,6 @@ public class JBean {
 
         List<Class<?>> annotated = reflections.getClassesAnnotatedWith(jb.getPackageToScan(), BeanConfiguration.class);
 
-        String name = "";
         for (Class<?> clazz : annotated) {
 
             Object resourceList = clazz.newInstance();
@@ -137,10 +136,7 @@ public class JBean {
             for (Method method : methods) {
                 Bean bean = method.getAnnotation(Bean.class);
                 if (bean != null && bean.scope() == BeanScope.SINGLETON) {
-                    Object obj = method.invoke(resourceList);
-                    name = BeanUtil.getBeanName(bean, obj.getClass());
-                    _log("Find bean " + name);
-                    beanList.put(name, new BeanInfo(bean.scope(), obj));
+                    _register(bean, method.invoke(resourceList));
                     i++;
                 }
             }
@@ -262,19 +258,29 @@ public class JBean {
                 if (bean == null) {
                     return;
                 }
-                String name = BeanUtil.getBeanName(bean, clazz);
-                _log("Find bean ......" + name);
-
-                BeanInfo b = null;
-                if (bean.scope() == BeanScope.SINGLETON) {
-                    b = new BeanInfo(bean.scope(), clazz.newInstance());
-
-                } else if (bean.scope() == BeanScope.PROTOTYPE) {
-                    b = new BeanInfo(bean.scope(), clazz);
-                }
-                beanList.put(name, b);
+                _register(bean, clazz.newInstance());
             }
         } catch (Exception ex) {
+            _log(ex.getMessage());
+        }
+    }
+
+    private static void _register(Bean bean, Object instance) {
+        try {
+            String name = BeanUtil.getBeanName(bean, instance.getClass());
+            _log("Find bean ......" + name);
+            BeanInfo b = null;
+            if (bean.scope() == BeanScope.SINGLETON) {
+                b = new BeanInfo(bean.scope(), instance);
+
+            } else if (bean.scope() == BeanScope.PROTOTYPE) {
+                b = new BeanInfo(bean.scope(), name);
+            }
+            beanList.put(name, b);
+
+        } catch (
+
+        Exception ex) {
             _log(ex.getMessage());
         }
     }

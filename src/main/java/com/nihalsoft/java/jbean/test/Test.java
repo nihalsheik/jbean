@@ -8,13 +8,11 @@ public class Test {
         
         System.out.println("==================================");
         
-        JBean.build().includeSuperClassForInject(true).run(Test.class);
+        JBean.builder().includeSuperClassForInject(true).registerWith(EmpDao.class).build(Test.class);
         
-        EmpDao td = JBean.get("empdao");
+        EmpDao td = JBean.get(EmpDao.class);
         td.test();
 
-        TestDao td2 = JBean.get("testdao");
-        td2.test();
         
     }
 
